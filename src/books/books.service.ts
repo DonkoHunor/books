@@ -11,6 +11,13 @@ export interface UpdateInput extends Book {
   prevBook: BookFinder;
 }
 
+export function yearCheck(year: number) {
+  const currentYear = new Date().getFullYear();
+  if (year < 0 || year > currentYear) {
+    throw new BadRequestException();
+  }
+}
+
 @Injectable()
 export class BooksService {
   private books: Book[] = [];
@@ -44,10 +51,11 @@ export class BooksService {
     if (
       newBookInput.title === undefined ||
       newBookInput.author === undefined ||
-      newBookInput.publish_year === null
+      newBookInput.publish_year === undefined
     ) {
       throw new BadRequestException();
     }
+    yearCheck(newBookInput.publish_year);
     this.books.push({ ...newBookInput });
     return newBookInput;
   }
@@ -80,6 +88,7 @@ export class BooksService {
         if (input.publish_year !== undefined) {
           book.publish_year = input.publish_year;
         }
+        yearCheck(input.publish_year);
         return book;
       }
     }

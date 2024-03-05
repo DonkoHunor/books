@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BooksService } from './books.service';
 import { Book } from './books.model';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('BooksService', () => {
   let service: BooksService;
@@ -22,6 +22,26 @@ describe('BooksService', () => {
         publish_year: 2015,
       });
       expect(service.getAllBooks().length).toEqual(1);
+    });
+
+    it('should return BadRequestException if the input is wrong', () => {
+      expect(() =>
+        service.addNewBook({
+          title: undefined,
+          author: 'testAuthor',
+          publish_year: undefined,
+        }),
+      ).toThrow(BadRequestException);
+    });
+
+    it('should return BadRequestException if the year is out of range', () => {
+      expect(() =>
+        service.addNewBook({
+          title: 'testTitle',
+          author: 'testAuthor',
+          publish_year: 9999,
+        }),
+      ).toThrow(BadRequestException);
     });
   });
 
@@ -152,6 +172,22 @@ describe('BooksService', () => {
           ...updateData,
         });
       }).toThrow(NotFoundException);
+    });
+
+    it('should return BadRequestException if the year is out of range', () => {
+      service.addNewBook({
+        title: 'testTitle',
+        author: 'testAuthor',
+        publish_year: 1976,
+      });
+      expect(() =>
+        service.updateBook({
+          title: 'updatedTitle',
+          author: 'testAuthor',
+          publish_year: 9999,
+          prevBook: { title: 'testTitle', author: 'testAuthor' },
+        }),
+      ).toThrow(BadRequestException);
     });
   });
 
